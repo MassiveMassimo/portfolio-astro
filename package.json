@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "cursor:server": "bun src/server/cursor-server.ts"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",

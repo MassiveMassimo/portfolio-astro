@@ -1,93 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import CursorClient from "../components/CursorClient.astro";
 ---
 
 <Layout>
-  <div class="flex min-h-screen flex-col gap-8 p-8">
-    <div class="mx-auto max-w-4xl space-y-12">
-      <section>
-        <h2 class="mb-4 text-3xl font-bold">H Tags - Default (Marlin)</h2>
-        <h1>H1: The quick brown fox jumps over the lazy dog</h1>
-        <h2>H2: The quick brown fox jumps over the lazy dog</h2>
-        <h3>H3: The quick brown fox jumps over the lazy dog</h3>
-        <h4>H4: The quick brown fox jumps over the lazy dog</h4>
-        <h5>H5: The quick brown fox jumps over the lazy dog</h5>
-        <h6>H6: The quick brown fox jumps over the lazy dog</h6>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-3xl font-bold">H Tags - font-serif (Fraunces)</h2>
-        <h1 class="font-serif">
-          H1: The quick brown fox jumps over the lazy dog
-        </h1>
-        <h2 class="font-serif">
-          H2: The quick brown fox jumps over the lazy dog
-        </h2>
-        <h3 class="font-serif">
-          H3: The quick brown fox jumps over the lazy dog
-        </h3>
-        <h4 class="font-serif">
-          H4: The quick brown fox jumps over the lazy dog
-        </h4>
-        <h5 class="font-serif">
-          H5: The quick brown fox jumps over the lazy dog
-        </h5>
-        <h6 class="font-serif">
-          H6: The quick brown fox jumps over the lazy dog
-        </h6>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-3xl font-bold">P Tags - Default (Marlin)</h2>
-        <p>
-          Regular paragraph text: The quick brown fox jumps over the lazy dog.
-        </p>
-        <p>
-          <i
-            >Italic text in paragraph: The quick brown fox jumps over the lazy
-            dog.</i
-          >
-        </p>
-        <p>
-          <em
-            >Emphasized text in paragraph: The quick brown fox jumps over the
-            lazy dog.</em
-          >
-        </p>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-3xl font-bold">P Tags - font-serif (Fraunces)</h2>
-        <p class="font-serif">
-          Regular paragraph text: The quick brown fox jumps over the lazy dog.
-        </p>
-        <p class="font-serif">
-          <i
-            >Italic text in paragraph: The quick brown fox jumps over the lazy
-            dog.</i
-          >
-        </p>
-        <p class="font-serif">
-          <em
-            >Emphasized text in paragraph: The quick brown fox jumps over the
-            lazy dog.</em
-          >
-        </p>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-3xl font-bold">I Tags - Default</h2>
-        <p>Regular text with <i>italic tag</i> inside.</p>
-        <p>Regular text with <em>emphasized tag</em> inside.</p>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-3xl font-bold">I Tags - font-serif</h2>
-        <p class="font-serif">Serif text with <i>italic tag</i> inside.</p>
-        <p class="font-serif">
-          Serif text with <em>emphasized tag</em> inside.
-        </p>
-      </section>
+  <main class="flex min-h-screen flex-col p-8">
+    <div class="mx-auto w-full max-w-4xl">
+      <CursorClient />
     </div>
-  </div>
+  </main>
 </Layout>

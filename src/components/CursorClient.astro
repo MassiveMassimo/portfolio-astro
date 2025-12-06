@@ -1,0 +1,228 @@
+---
+// Astro-native cursor client using the existing Elysia WebSocket backend.
+const wsBase = import.meta.env.PUBLIC_CURSOR_WS;
+const wsPort = import.meta.env.PUBLIC_CURSOR_PORT;
+---
+
+<div
+  class="space-y-6"
+  id="cursor-root"
+  data-ws-base={wsBase}
+  data-ws-port={wsPort}
+>
+  <div class="space-y-2">
+    <h1 class="text-3xl font-bold">Multiplayer cursor demo</h1>
+    <p class="text-sm text-neutral-600">
+      Room: <span id="room-label" class="font-mono">/</span>
+    </p>
+    <p class="text-sm text-neutral-600">
+      Enter a name, click start, then move your mouse.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <label class="flex-1 text-sm font-medium text-neutral-800">
+      Name
+      <input
+        id="name-input"
+        class="mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-base shadow-sm transition outline-none focus:border-neutral-500 focus:ring-2 focus:ring-neutral-200"
+        placeholder="Type your name"
+        required
+      />
+    </label>
+    <button
+      id="start-btn"
+      type="button"
+      class="h-10 rounded-md bg-neutral-900 px-4 text-sm font-semibold text-white shadow transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
+    >
+      Start
+    </button>
+  </div>
+
+  <p id="error-text" class="hidden text-sm text-red-600"></p>
+
+  <div
+    id="canvas"
+    class="relative h-[520px] w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm"
+  >
+    <div class="pointer-events-none absolute inset-0" id="cursor-layer"></div>
+    <div
+      id="overlay"
+      class="absolute inset-0 flex items-center justify-center bg-white/70 text-neutral-700"
+    >
+      <p class="text-sm font-medium">Start to share your cursor.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Cursor parts inspired by Astro Collaborative Starter */
+  #cursor-layer .cursor {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transform: translate(-50%, -50%);
+  }
+  #cursor-layer .cursor-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+  }
+  #cursor-layer .cursor-label {
+    border-radius: 0.375rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+</style>
+
+<script lang="ts">
+  const root = document.querySelector("#cursor-root");
+  if (!root) return;
+
+  const nameInput = root.querySelector("#name-input");
+  const startBtn = root.querySelector("#start-btn");
+  const errorText = root.querySelector("#error-text");
+  const overlay = root.querySelector("#overlay");
+  const cursorLayer = root.querySelector("#cursor-layer");
+  const roomLabel = root.querySelector("#room-label");
+
+  if (!(nameInput instanceof HTMLInputElement)) return;
+  if (!(startBtn instanceof HTMLButtonElement)) return;
+  if (!(errorText instanceof HTMLParagraphElement)) return;
+  if (!(overlay instanceof HTMLDivElement)) return;
+  if (!(cursorLayer instanceof HTMLDivElement)) return;
+  if (!(roomLabel instanceof HTMLSpanElement)) return;
+
+  const roomId = window.location.pathname || "/";
+  roomLabel.textContent = roomId;
+
+  const base = root.dataset.wsBase;
+  const port = root.dataset.wsPort;
+
+  const buildWsUrl = () => {
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const defaultUrl = `${protocol}://${window.location.hostname}:${port || "3001"}/cursor`;
+    return `${base || defaultUrl}?room=${encodeURIComponent(roomId)}`;
+  };
+
+  let ws = null;
+  let selfId = null;
+  let connected = false;
+  let rafPending = false;
+  const cursors = new Map();
+
+  const hashColor = (id) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++)
+      hash = (hash << 5) - hash + id.charCodeAt(i);
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}deg 70% 55%)`;
+  };
+
+  const setError = (msg) => {
+    if (!msg) {
+      errorText.classList.add("hidden");
+      errorText.textContent = "";
+    } else {
+      errorText.classList.remove("hidden");
+      errorText.textContent = msg;
+    }
+  };
+
+  const render = () => {
+    cursorLayer.innerHTML = "";
+    for (const cursor of cursors.values()) {
+      const dot = document.createElement("div");
+      dot.className = "cursor";
+      dot.style.left = `${Math.min(1, Math.max(0, cursor.x)) * 100}%`;
+      dot.style.top = `${Math.min(1, Math.max(0, cursor.y)) * 100}%`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "cursor-dot";
+      const color = hashColor(cursor.userId);
+      bubble.style.background = color;
+      bubble.style.boxShadow = `0 0 0 3px ${color}30`;
+
+      const label = document.createElement("span");
+      label.className = "cursor-label";
+      label.textContent = cursor.userId.split("#")[0] || cursor.userId;
+
+      dot.appendChild(bubble);
+      dot.appendChild(label);
+      cursorLayer.appendChild(dot);
+    }
+  };
+
+  const handleMessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "cursor" && data.roomId === roomId) {
+        cursors.set(data.userId, { x: data.x, y: data.y, userId: data.userId });
+      } else if (data.type === "leave" && data.roomId === roomId) {
+        cursors.delete(data.userId);
+      }
+      render();
+    } catch (err) {
+      console.error("Failed to parse message", err);
+    }
+  };
+
+  const handleMove = (event) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN || !selfId) return;
+    const x = event.clientX / window.innerWidth;
+    const y = event.clientY / window.innerHeight;
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      ws?.send(JSON.stringify({ userId: selfId, x, y }));
+    });
+  };
+
+  const cleanup = () => {
+    window.removeEventListener("mousemove", handleMove);
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    ws = null;
+    connected = false;
+    startBtn.disabled = false;
+    overlay.classList.remove("hidden");
+  };
+
+  const connect = () => {
+    const name = nameInput.value.trim().slice(0, 40);
+    if (!name) {
+      setError("Enter a name to join.");
+      return;
+    }
+    setError(null);
+    const url = buildWsUrl();
+    if (!url) {
+      setError("WebSocket URL is not available.");
+      return;
+    }
+    const id = `${name}#${crypto.randomUUID().slice(0, 8)}`;
+    selfId = id;
+    startBtn.disabled = true;
+
+    ws = new WebSocket(url);
+    ws.addEventListener("open", () => {
+      connected = true;
+      overlay.classList.add("hidden");
+      window.addEventListener("mousemove", handleMove);
+    });
+    ws.addEventListener("message", handleMessage);
+    ws.addEventListener("close", cleanup);
+    ws.addEventListener("error", () =>
+      setError("WebSocket error. Check the server is running.")
+    );
+  };
+
+  startBtn.addEventListener("click", connect);
+  window.addEventListener("beforeunload", cleanup);
+</script>
