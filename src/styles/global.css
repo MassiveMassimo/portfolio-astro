@@ -1,20 +1,5 @@
-@font-face {
-  font-family: "Fraunces";
-  src: url("/fonts/Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf")
-    format("truetype");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Fraunces";
-  src: url("/fonts/Fraunces-Italic-VariableFont_SOFT,WONK,opsz,wght.ttf")
-    format("truetype");
-  font-weight: 100 900;
-  font-style: italic;
-  font-display: swap;
-}
+@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/fraunces/wght-italic.css";
 
 /* Marlin Normal Weights */
 @font-face {
@@ -147,6 +132,6 @@
 }
 
 html:root {
-  --font-serif: "Fraunces", serif;
+  --font-serif: "Fraunces Variable", serif;
   --font-sans: "Marlin", sans-serif;
 }
