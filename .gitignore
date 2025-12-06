@@ -8,12 +8,10 @@ dist/
 
 # Dependencies and package manager artifacts
 node_modules/
-.pnpm-store/
 *.tgz
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
 # Environment variables
 .env

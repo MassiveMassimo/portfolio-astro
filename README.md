@@ -6,17 +6,17 @@ Simple Astro 5 site (starter-based) styled with UnoCSS `presetWind4` utilities. 
 
 - Astro 5 (static output by default)
 - UnoCSS with `presetWind4` (Tailwind-compatible utilities)
-- pnpm for dependency management
+- bun for dependency management
 - Prettier with Astro and Tailwind plugins
 
 ## Quick Start
 
-- Prerequisites: Node 18+ and pnpm installed.
-- Install deps: `pnpm install`
-- Dev server: `pnpm dev` (http://localhost:4321)
-- Production build: `pnpm build` → outputs to `dist/`
-- Preview build: `pnpm preview`
-- Astro CLI passthrough: `pnpm astro <command>` (e.g., `pnpm astro check`)
+- Prerequisites: Node 18+ and bun installed.
+- Install deps: `bun install`
+- Dev server: `bun dev` (http://localhost:4321)
+- Production build: `bun build` → outputs to `dist/`
+- Preview build: `bun preview`
+- Astro CLI passthrough: `bun astro <command>` (e.g., `bun astro check`)
 
 ## Project Structure
 
@@ -51,4 +51,4 @@ Simple Astro 5 site (starter-based) styled with UnoCSS `presetWind4` utilities. 
 
 ## Deployment
 
-`pnpm build` produces a static site in `dist/` suitable for static hosting (Netlify, Vercel static, GitHub Pages, etc.). If you add SSR features, install the appropriate Astro adapter and note any new build/deploy steps.
+`bun build` produces a static site in `dist/` suitable for static hosting (Netlify, Vercel static, GitHub Pages, etc.). If you add SSR features, install the appropriate Astro adapter and note any new build/deploy steps.
