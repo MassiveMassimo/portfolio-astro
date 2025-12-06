@@ -1,24 +1,48 @@
-# build output
+# Build output
 dist/
-
-# generated types
 .astro/
+.output/
+.vercel/
+.netlify/
+.vite/
 
-# dependencies
+# Dependencies and package manager artifacts
 node_modules/
-
-# logs
+.pnpm-store/
+*.tgz
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
+# Environment variables
 .env
-.env.production
+.env.*
+!.env.example
+!.env.sample
 
-# macOS-specific files
+# Logs and diagnostics
+*.log
+coverage/
+.nyc_output/
+*.pid
+*.pid.lock
+
+# Editor and OS files
 .DS_Store
-
-# jetbrains setting folder
+Thumbs.db
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# Tooling/cache
+.cursor/
+tmp/
+temp/
+
+# Local docs/notes
+WARP.md
