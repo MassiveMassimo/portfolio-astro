@@ -1,0 +1,152 @@
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Italic-VariableFont_SOFT,WONK,opsz,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Marlin Normal Weights */
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ Bold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ExtraBold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ Black.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ExtraBlack.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Marlin Italic Weights */
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ThinItalic.ttf") format("truetype");
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ExtraLightItalic.ttf") format("truetype");
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ LightItalic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ RegularItalic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ MediumItalic.ttf") format("truetype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ BoldItalic.ttf") format("truetype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ExtraBoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ BlackItalic.ttf") format("truetype");
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Marlin";
+  src: url("/fonts/Marlin Soft SQ ExtraBlackItalic.ttf") format("truetype");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+html:root {
+  --font-serif: "Fraunces", serif;
+  --font-sans: "Marlin", sans-serif;
+}
