@@ -4,6 +4,6 @@ import UnoCSS from "unocss/astro";
 
 // https://astro.build/config
 export default defineConfig({
-  output: "server",
+  output: "static",
   integrations: [UnoCSS()],
 });

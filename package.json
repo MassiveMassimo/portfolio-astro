@@ -7,7 +7,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "cursor:server": "bun src/server/cursor-server.ts"
+    "cursor:server": "bun src/server/cursor-server.ts",
+    "cf:dev": "wrangler pages dev dist --compatibility-flags web_socket_accept",
+    "cf:deploy": "wrangler pages deploy dist"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",

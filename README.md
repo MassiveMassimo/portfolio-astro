@@ -1,54 +1,60 @@
 # Portfolio Astro
 
-Simple Astro 5 site (starter-based) styled with UnoCSS `presetWind4` utilities. Use this as a base to iterate on your personal portfolio.
+Astro 5 + UnoCSS site with a multiplayer cursor demo. Frontend runs as a static build; real-time cursors are served by a Cloudflare Pages Function at `/cursor` (WebSocket). Local fallback Elysia server exists for dev.
 
 ## Tech Stack
 
-- Astro 5 (static output by default)
-- UnoCSS with `presetWind4` (Tailwind-compatible utilities)
-- bun for dependency management
-- Prettier with Astro and Tailwind plugins
+- Astro 5 (static output)
+- UnoCSS with `presetWind4`
+- Cloudflare Pages + Functions (Workers runtime) for `/cursor`
+- Bun for tooling
 
-## Quick Start
+## Quick Start (local)
 
-- Prerequisites: Node 18+ and bun installed.
-- Install deps: `bun install`
-- Dev server: `bun dev` (http://localhost:4321)
-- Production build: `bun build` → outputs to `dist/`
-- Preview build: `bun preview`
-- Astro CLI passthrough: `bun astro <command>` (e.g., `bun astro check`)
+- Prereqs: Node 18+, bun.
+- Install: `bun install`
+- Dev (Astro only): `bun run dev` (http://localhost:4321)
+- Optional local WS backend (Elysia): `bun run cursor:server` (uses `CURSOR_PORT` or 3001)
+- Build: `bun run build` → `dist/`
+- Preview: `bun run preview`
+
+## Realtime cursors
+
+- Frontend island: `src/components/CursorClient.astro`
+- Room = `window.location.pathname`
+- Payload: `{ userId, x, y }` normalized 0–1; broadcasts `cursor` and `leave`.
+- Environment:
+  - `PUBLIC_CURSOR_WS` (recommended in prod, e.g. `wss://<domain>/cursor`)
+  - `PUBLIC_CURSOR_PORT` (optional dev fallback; defaults to 3001)
+
+## Cloudflare Pages + Functions
+
+- Function: `functions/cursor.ts` (Pages Functions entry at `/cursor`, WebSocket upgrade, in-memory room map).
+- Config: `wrangler.toml` (static build, compatibility_date).
+- Build: `PUBLIC_CURSOR_WS=wss://<project>.pages.dev/cursor bun run build`
+- Deploy: `wrangler pages deploy dist --project-name <project>` (or use `bun run cf:deploy` if env already set)
+- Local Pages dev (Functions): `bun run cf:dev` (serves built `dist` + functions)
 
 ## Project Structure
 
 ```
 /
-├── public/                 # Static assets served at site root
+├── functions/              # Cloudflare Pages Functions (`/cursor`)
+├── public/                 # Static assets
 ├── src/
-│   ├── assets/             # Imported assets (astro.svg, background.svg, ...)
+│   ├── assets/
 │   ├── components/
-│   │   └── Welcome.astro   # Hero UI rendered on the homepage
+│   │   └── CursorClient.astro
 │   ├── layouts/
-│   │   └── Layout.astro    # HTML shell + <slot />
 │   └── pages/
-│       └── index.astro     # Route for "/"
-├── astro.config.mjs        # Registers UnoCSS integration
-├── uno.config.ts           # UnoCSS config with presetWind4
-└── package.json
+│       └── index.astro
+├── astro.config.mjs
+├── package.json
+├── wrangler.toml
+└── uno.config.ts
 ```
 
-## Styling
+## Notes
 
-- UnoCSS is enabled via `astro.config.mjs` and configured in `uno.config.ts` with `presetWind4` for Tailwind-style utilities.
-- Add custom rules/presets in `uno.config.ts`; utilities are tree-shaken on build.
-- Component styles live in `.astro` files; global shell classes are applied in `Layout.astro`.
-
-## Development Notes
-
-- Format using Prettier (`.prettierrc` includes `prettier-plugin-astro` and `prettier-plugin-tailwindcss`).
-- There are no tests configured yet; add your preferred runner and document commands when you do.
-- Update `Layout.astro` for global `<head>` tags (title/SEO) and `Welcome.astro` for hero content.
-- For static assets referenced by path, place them in `public/`; for imported/bundled assets, use `src/assets/`.
-
-## Deployment
-
-`bun build` produces a static site in `dist/` suitable for static hosting (Netlify, Vercel static, GitHub Pages, etc.). If you add SSR features, install the appropriate Astro adapter and note any new build/deploy steps.
+- Formatting: Prettier with Astro + Tailwind plugins (`bun x prettier --check .`).
+- Static output: No adapter required; if you add SSR routes, install an adapter and document the build changes.

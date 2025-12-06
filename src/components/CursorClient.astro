@@ -108,7 +108,8 @@ const wsPort = import.meta.env.PUBLIC_CURSOR_PORT;
   const buildWsUrl = () => {
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const defaultUrl = `${protocol}://${window.location.hostname}:${port || "3001"}/cursor`;
-    return `${base || defaultUrl}?room=${encodeURIComponent(roomId)}`;
+    const resolved = base || defaultUrl;
+    return `${resolved}?room=${encodeURIComponent(roomId)}`;
   };
 
   let ws = null;
@@ -226,3 +227,4 @@ const wsPort = import.meta.env.PUBLIC_CURSOR_PORT;
   startBtn.addEventListener("click", connect);
   window.addEventListener("beforeunload", cleanup);
 </script>
+
