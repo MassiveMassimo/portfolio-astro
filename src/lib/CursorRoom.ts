@@ -137,4 +137,3 @@ export class CursorRoom extends DurableObject {
     }
   }
 }
-

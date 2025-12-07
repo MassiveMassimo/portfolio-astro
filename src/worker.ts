@@ -2,11 +2,6 @@ import { type SSRManifest } from "astro";
 import { App } from "astro/app";
 import { handle } from "@astrojs/cloudflare/handler";
 import { CursorRoom } from "./lib/CursorRoom";
-
-// Re-export the Durable Object class so Cloudflare sees it
-export { CursorRoom };
-
-// The default export is required by the adapter to build the worker
 export function createExports(manifest: SSRManifest) {
   const app = new App(manifest);
 
@@ -20,4 +15,3 @@ export function createExports(manifest: SSRManifest) {
     CursorRoom,
   };
 }
-
