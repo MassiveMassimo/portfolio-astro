@@ -19,6 +19,10 @@ yarn-error.log*
 .env.*
 !.env.example
 !.env.sample
+.dev.vars
+
+# Cloudflare specific
+.wrangler/
 
 # Logs and diagnostics
 *.log

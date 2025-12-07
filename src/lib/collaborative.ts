@@ -48,11 +48,7 @@ class CollaborativeStore extends EventTarget {
     if (this.ws) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host =
-      import.meta.env.PUBLIC_WORKER_URL ||
-      (import.meta.env.PROD
-        ? "your-worker.your-name.workers.dev"
-        : "localhost:8787");
+    const host = import.meta.env.PUBLIC_WORKER_URL || window.location.host;
 
     this.ws = new WebSocket(`${protocol}//${host}/room/${this.roomId}`);
 

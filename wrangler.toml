@@ -1,6 +1,6 @@
-name = "astro-cursors"
-main = "src/index.ts"
+name = "portfolio-astro"
 compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
 
 # Define the Durable Object namespace
 [[durable_objects.bindings]]
@@ -12,3 +12,7 @@ class_name = "CursorRoom"
 tag = "v1"
 new_classes = ["CursorRoom"]
 
+# KV Namespace for Sessions
+[[kv_namespaces]]
+binding = "SESSION"
+id = "657755ec2e4b4aaa81b1493a7a444f00"

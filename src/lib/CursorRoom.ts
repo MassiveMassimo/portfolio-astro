@@ -1,37 +1,16 @@
 import { DurableObject } from "cloudflare:workers";
 
-interface Env {
-  CURSOR_ROOM: DurableObjectNamespace;
-}
-
-// 1. The Worker Entrypoint matches requests to rooms
-export default {
-  async fetch(request: Request, env: Env) {
-    const url = new URL(request.url);
-
-    // Route /room/:id to a specific Durable Object
-    if (url.pathname.startsWith("/room/")) {
-      const id = env.CURSOR_ROOM.idFromName(url.pathname);
-      const stub = env.CURSOR_ROOM.get(id);
-      return stub.fetch(request);
-    }
-
-    return new Response("Not found", { status: 404 });
-  },
-};
-
-type Attachment = {
+interface Attachment {
   id: string;
   info: any;
   route: string;
   x?: number;
   y?: number;
-};
+}
 
-// 2. The Durable Object "Room"
+// 1. The Durable Object "Room"
 export class CursorRoom extends DurableObject {
   // In-memory cache for high-frequency cursor updates
-  // We avoid writing these to the attachment storage (disk/KV) to save IO/CPU
   private cursorPositions = new Map<WebSocket, { x: number; y: number }>();
 
   // Handle the HTTP request to upgrade to WebSocket
@@ -41,7 +20,8 @@ export class CursorRoom extends DurableObject {
     }
 
     const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
+    const client = pair[0];
+    const server = pair[1];
 
     // Accept the connection via Hibernation API
     this.ctx.acceptWebSocket(server);
@@ -134,7 +114,7 @@ export class CursorRoom extends DurableObject {
   }
 
   private getAllUsers() {
-    const users: any[] = [];
+    const users: Attachment[] = [];
     for (const ws of this.ctx.getWebSockets()) {
       const s = ws.deserializeAttachment() as Attachment | null;
       if (s) {
