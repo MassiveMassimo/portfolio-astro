@@ -86,11 +86,29 @@ bun dev
 - Layout metadata (title, lang, favicon): `src/layouts/Layout.astro`.
 - UnoCSS presets/utilities: adjust `uno.config.ts`; add shortcuts or themes as needed.
 
-## Deployment
+## Deployment (Cloudflare Workers)
+
+- Adapter: `@astrojs/cloudflare` with custom `workerEntryPoint` at `src/worker.ts`.
+- Durable Object: `CursorRoom` is exported from `createExports()` and bound as `CURSOR_ROOM` in `wrangler.toml` (migration tag `v1`).
+- Assets: `_worker.js` and `_routes.json` are ignored via `public/.assetsignore` (Workers don’t need `_routes.json`).
+
+Common commands:
 
 ```sh
+# Build (server output)
 bun build
-# Deploy the generated dist/ folder to your static host of choice.
+
+# Deploy via Wrangler
+wrangler deploy
 ```
 
-Happy building!
+## Multiplayer cursors (how it works)
+
+- Client: `src/lib/collaborative.ts` manages a WS connection and presence; cursors rendered by `src/components/Cursors.ts`, avatars by `src/components/Avatars.ts`.
+- Server: `src/lib/CursorRoom.ts` Durable Object handles joins, route changes, and cursor broadcasts (scoped per route). The WebSocket upgrade is proxied through `src/pages/room/[id].ts` which forwards to the DO stub.
+- Types: `src/env.d.ts` extends `App.Locals` with Cloudflare runtime; `wrangler.toml` defines the DO binding.
+
+## Notes
+
+- Dev server uses the Cloudflare runtime via the adapter; ensure `wrangler` is installed for local testing with bindings.
+- If you add new bindings (KV, R2, etc.), declare them in `wrangler.toml` and extend `Env` in `src/env.d.ts`.
