@@ -20,3 +20,4 @@ export function createExports(manifest: SSRManifest) {
     CursorRoom,
   };
 }
+
