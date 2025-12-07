@@ -1,5 +1,72 @@
 ---
 import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: string;
+  robots?: string;
+  siteName?: string;
+  locale?: string;
+  twitterCreator?: string;
+  ogImageAlt?: string;
+  author?: string;
+  datePublished?: string;
+  dateModified?: string;
+}
+
+const {
+  title = "Astro Basics - Get Started with Astro",
+  description = "A polished Astro 5 landing page starter with custom typography, gradient hero, and news spotlight card. Built with UnoCSS and Bun for a fast developer experience.",
+  image,
+  type = "website",
+  robots = "index, follow",
+  siteName = "Astro Basics",
+  locale = "en_US",
+  twitterCreator,
+  ogImageAlt = "Social share image",
+  author,
+  datePublished,
+  dateModified,
+} = Astro.props;
+
+const isArticle = type === "article";
+
+// Construct canonical URL using Astro best practices
+const canonicalURL = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site)
+  : Astro.url;
+
+// Construct full image URL for Open Graph
+const ogImage = image
+  ? new URL(image, Astro.site || Astro.url.origin)
+  : new URL("/favicon.svg", Astro.site || Astro.url.origin);
+
+const structuredData = isArticle
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: title,
+      name: title,
+      description,
+      url: canonicalURL.toString(),
+      image: ogImage.toString(),
+      ...(author && { author: { "@type": "Person", name: author } }),
+      ...(datePublished && { datePublished }),
+      ...(dateModified && { dateModified }),
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalURL.toString(),
+      },
+    }
+  : {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: title,
+      description,
+      url: canonicalURL.toString(),
+    };
 ---
 
 <!doctype html>
@@ -9,7 +76,41 @@ import "../styles/global.css";
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro Basics</title>
+    <meta name="theme-color" content="#0f172a" />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL.toString()} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL.toString()} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage.toString()} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content={locale} />
+    <meta property="og:image:alt" content={ogImageAlt} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL.toString()} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage.toString()} />
+    {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+    />
   </head>
   <body class="m-0 min-h-screen w-full font-sans">
     <slot />
