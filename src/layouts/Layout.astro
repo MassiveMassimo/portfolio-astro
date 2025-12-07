@@ -111,8 +111,24 @@ const structuredData = isArticle
       type="application/ld+json"
       set:html={JSON.stringify(structuredData)}
     />
+    <script>
+      import "../components/Cursors.ts";
+      import "../components/Avatars.ts";
+      import { collaborative } from "../lib/collaborative";
+
+      const user = {
+        name: "Guest " + Math.floor(Math.random() * 1000),
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16),
+      };
+
+      collaborative.init("global-room", user);
+    </script>
   </head>
   <body class="m-0 min-h-screen w-full font-sans">
+    <div class="fixed top-4 right-4 z-50">
+      <live-avatars></live-avatars>
+    </div>
+    <cursors-overlay></cursors-overlay>
     <slot />
   </body>
 </html>

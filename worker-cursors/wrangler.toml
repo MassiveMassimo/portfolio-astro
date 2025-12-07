@@ -1,0 +1,14 @@
+name = "astro-cursors"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+# Define the Durable Object namespace
+[[durable_objects.bindings]]
+name = "CURSOR_ROOM"
+class_name = "CursorRoom"
+
+# Migrations are required for Durable Objects
+[[migrations]]
+tag = "v1"
+new_classes = ["CursorRoom"]
+

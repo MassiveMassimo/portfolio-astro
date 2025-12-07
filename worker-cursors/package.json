@@ -1,0 +1,19 @@
+{
+  "name": "worker-cursors",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250224.0",
+    "typescript": "^5.7.3",
+    "wrangler": "^3.109.3"
+  },
+  "dependencies": {
+    "@astrojs/lit": "^4.3.0",
+    "lit": "^3.3.1"
+  }
+}
