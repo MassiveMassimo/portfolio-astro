@@ -6,18 +6,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "cursor:server": "bun src/server/cursor-server.ts",
-    "cf:dev": "wrangler pages dev dist --compatibility-flags web_socket_accept",
-    "cf:deploy": "wrangler pages deploy dist"
+    "astro": "astro"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",
-    "astro": "^5.16.4",
-    "elysia": "^1.4.18"
+    "astro": "^5.16.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.3.3",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",

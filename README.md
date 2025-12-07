@@ -1,60 +1,96 @@
 # Portfolio Astro
 
-Astro 5 + UnoCSS site with a multiplayer cursor demo. Frontend runs as a static build; real-time cursors are served by a Cloudflare Pages Function at `/cursor` (WebSocket). Local fallback Elysia server exists for dev.
+A polished Astro 5 landing page starter with custom typography, a gradient hero, and a news spotlight card. Built with UnoCSS (Wind 4 preset) and Bun for a fast DX.
+
+## Contents
+
+- Overview
+- Tech Stack
+- Project Structure
+- Getting Started
+- Available Scripts
+- Styling & Theming
+- Customization Notes
+- Deployment
+
+## Overview
+
+- Gradient hero with Astro logo, quick-start instructions, and dual CTAs to Docs + Discord.
+- Blurred ambient background from `src/assets/background.svg`.
+- News card highlighting the latest Astro 5.0 updates.
+- Fully responsive layout using UnoCSS utility classes.
+- Custom typography: Marlin family (served locally) and Fraunces Variable.
 
 ## Tech Stack
 
-- Astro 5 (static output)
-- UnoCSS with `presetWind4`
-- Cloudflare Pages + Functions (Workers runtime) for `/cursor`
-- Bun for tooling
-
-## Quick Start (local)
-
-- Prereqs: Node 18+, bun.
-- Install: `bun install`
-- Dev (Astro only): `bun run dev` (http://localhost:4321)
-- Optional local WS backend (Elysia): `bun run cursor:server` (uses `CURSOR_PORT` or 3001)
-- Build: `bun run build` → `dist/`
-- Preview: `bun run preview`
-
-## Realtime cursors
-
-- Frontend island: `src/components/CursorClient.astro`
-- Room = `window.location.pathname`
-- Payload: `{ userId, x, y }` normalized 0–1; broadcasts `cursor` and `leave`.
-- Environment:
-  - `PUBLIC_CURSOR_WS` (recommended in prod, e.g. `wss://<domain>/cursor`)
-  - `PUBLIC_CURSOR_PORT` (optional dev fallback; defaults to 3001)
-
-## Cloudflare Pages + Functions
-
-- Function: `functions/cursor.ts` (Pages Functions entry at `/cursor`, WebSocket upgrade, in-memory room map).
-- Config: `wrangler.toml` (static build, compatibility_date).
-- Build: `PUBLIC_CURSOR_WS=wss://<project>.pages.dev/cursor bun run build`
-- Deploy: `wrangler pages deploy dist --project-name <project>` (or use `bun run cf:deploy` if env already set)
-- Local Pages dev (Functions): `bun run cf:dev` (serves built `dist` + functions)
+- Astro `^5.16.4`
+- UnoCSS (`presetWind4`)
+- Bun (dependency + script runner)
+- Prettier with Astro + Tailwind plugins
 
 ## Project Structure
 
-```
+```text
 /
-├── functions/              # Cloudflare Pages Functions (`/cursor`)
-├── public/                 # Static assets
+├── public/
+│   ├── favicon.svg
+│   └── fonts/            # Marlin font family (full weight range)
 ├── src/
 │   ├── assets/
+│   │   ├── astro.svg
+│   │   └── background.svg
 │   ├── components/
-│   │   └── CursorClient.astro
+│   │   └── Welcome.astro # Hero, CTA buttons, news card
 │   ├── layouts/
-│   └── pages/
-│       └── index.astro
-├── astro.config.mjs
-├── package.json
-├── wrangler.toml
-└── uno.config.ts
+│   │   └── Layout.astro  # Global wrapper + metadata + styles import
+│   ├── pages/
+│   │   └── index.astro   # Renders the welcome layout
+│   └── styles/
+│       └── global.css    # Font faces + CSS variables
+├── uno.config.ts         # UnoCSS config (Wind 4 preset)
+├── package.json          # Scripts + deps
+└── bun.lock
 ```
 
-## Notes
+## Getting Started
 
-- Formatting: Prettier with Astro + Tailwind plugins (`bun x prettier --check .`).
-- Static output: No adapter required; if you add SSR routes, install an adapter and document the build changes.
+Prereqs: Node 20+ and Bun 1.1+ installed.
+
+```sh
+# Install
+bun install
+
+# Develop (http://localhost:4321)
+bun dev
+```
+
+## Available Scripts
+
+| Command       | Description                          |
+| :------------ | :----------------------------------- |
+| `bun dev`     | Start the dev server (4321)          |
+| `bun build`   | Build for production to `dist/`      |
+| `bun preview` | Preview the production build locally |
+| `bun astro`   | Run any Astro CLI command            |
+
+## Styling & Theming
+
+- UnoCSS utilities (Wind 4) power the layout classes in `Welcome.astro`.
+- `global.css` registers the Marlin family (100–900, normal + italic) and Fraunces Variable; CSS variables `--font-sans` and `--font-serif` are defined on `:root`.
+- Background blur and gradients come from `background.svg` and component-level classes—swap assets or adjust classes to change the aesthetic.
+
+## Customization Notes
+
+- Hero copy and CTAs: edit `src/components/Welcome.astro`.
+- Typography: update font-face declarations in `src/styles/global.css` or swap to another family; keep files in `public/fonts`.
+- Layout metadata (title, lang, favicon): `src/layouts/Layout.astro`.
+- UnoCSS presets/utilities: adjust `uno.config.ts`; add shortcuts or themes as needed.
+
+## Deployment
+
+```sh
+bun build
+# Deploy the generated dist/ folder to your static host of choice.
+```
+
+Happy building!

@@ -132,6 +132,6 @@
 }
 
 html:root {
+  --font-sans: "Marlin", sans-serif, system-ui;
   --font-serif: "Fraunces Variable", serif;
-  --font-sans: "Marlin", sans-serif;
 }
