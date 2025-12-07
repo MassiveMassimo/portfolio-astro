@@ -43,5 +43,8 @@ Thumbs.db
 tmp/
 temp/
 
+# Lighthouse reports
+lighthouse-reports/
+
 # Local docs/notes
 WARP.md
