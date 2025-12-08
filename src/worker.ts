@@ -8,7 +8,7 @@ export function createExports(manifest: SSRManifest) {
   return {
     default: {
       async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-        return handle(manifest, app, request, env, ctx);
+        return handle(manifest, app, request as any, env as any, ctx);
       },
     },
     // We also need to return the class here for the adapter to include it in the final bundle

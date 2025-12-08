@@ -9,5 +9,6 @@ declare namespace App {
 }
 
 interface Env {
+  ASSETS: Fetcher;
   CURSOR_ROOM: DurableObjectNamespace;
 }
