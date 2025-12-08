@@ -2,11 +2,24 @@ import { collaborative, type Presence } from "../lib/collaborative";
 
 type CursorPos = { x: number; y: number; info: any };
 
+// Spring physics state for smooth cursor animation
+interface SpringState {
+  x: number; // Current position
+  y: number;
+  vx: number; // Velocity
+  vy: number;
+}
+
 export class Cursors extends HTMLElement {
   // Target positions (where the server says cursors should be)
   private others: Record<string, CursorPos> = {};
-  // Current interpolated positions (where we are rendering them)
-  private current: Record<string, { x: number; y: number }> = {};
+  // Spring physics states for each cursor
+  private springs: Record<string, SpringState> = {};
+
+  // Spring physics parameters (tuned for smooth, responsive cursors)
+  private stiffness = 0.15; // Spring strength (higher = stiffer)
+  private damping = 0.8; // Damping ratio (0-1, higher = more friction)
+  private mass = 1; // Mass of the cursor
 
   private lastSent = 0;
   private throttleMs = 30; // 30ms ~ 33fps limit for network events
@@ -14,6 +27,7 @@ export class Cursors extends HTMLElement {
   private presenceCleanup: (() => void) | null = null;
   private container: HTMLDivElement;
   private rAF: number | null = null;
+  private lastFrameTime: number = 0;
 
   constructor() {
     super();
@@ -30,6 +44,9 @@ export class Cursors extends HTMLElement {
     if (typeof window !== "undefined") {
       window.addEventListener("mousemove", this.handleMouseMove);
 
+      // Initialize frame time tracking
+      this.lastFrameTime = performance.now();
+
       // Start the render loop
       this.loop();
 
@@ -40,9 +57,14 @@ export class Cursors extends HTMLElement {
           // Update the TARGET position
           this.others[data.id] = { x: data.x, y: data.y, info: user.info };
 
-          // Initialize current position if this is a new cursor
-          if (!this.current[data.id]) {
-            this.current[data.id] = { x: data.x, y: data.y };
+          // Initialize spring state if this is a new cursor
+          if (!this.springs[data.id]) {
+            this.springs[data.id] = {
+              x: data.x,
+              y: data.y,
+              vx: 0,
+              vy: 0,
+            };
           }
         }
       });
@@ -58,7 +80,7 @@ export class Cursors extends HTMLElement {
         for (const id in this.others) {
           if (!validIds.has(id)) {
             delete this.others[id];
-            delete this.current[id];
+            delete this.springs[id];
 
             // Remove DOM element immediately
             const el = this.container.querySelector(`[data-cursor-id="${id}"]`);
@@ -87,28 +109,70 @@ export class Cursors extends HTMLElement {
     this.lastSent = now;
   };
 
-  // Smooth animation loop
-  private loop = () => {
+  // Smooth animation loop with spring physics
+  private loop = (currentTime: number = performance.now()) => {
+    // Calculate delta time for frame-rate independent animation
+    const deltaTime = this.lastFrameTime
+      ? (currentTime - this.lastFrameTime) / 1000
+      : 0.016; // Default to ~60fps if first frame
+    this.lastFrameTime = currentTime;
+
+    this.updateSprings(deltaTime);
     this.render();
     this.rAF = requestAnimationFrame(this.loop);
   };
 
+  // Update spring physics for all cursors
+  private updateSprings(deltaTime: number) {
+    Object.entries(this.others).forEach(([id, target]) => {
+      const spring = this.springs[id];
+      if (!spring) return;
+
+      // Calculate spring force (Hooke's law)
+      const dx = target.x - spring.x;
+      const dy = target.y - spring.y;
+
+      // Spring force = -stiffness * displacement
+      const fx = this.stiffness * dx;
+      const fy = this.stiffness * dy;
+
+      // Damping force = -damping * velocity
+      const dampingForceX = this.damping * spring.vx;
+      const dampingForceY = this.damping * spring.vy;
+
+      // Net force = spring force - damping force
+      const netForceX = fx - dampingForceX;
+      const netForceY = fy - dampingForceY;
+
+      // Acceleration = Force / Mass
+      const ax = netForceX / this.mass;
+      const ay = netForceY / this.mass;
+
+      // Update velocity (v = v0 + a * dt)
+      spring.vx += ax * deltaTime;
+      spring.vy += ay * deltaTime;
+
+      // Update position (x = x0 + v * dt)
+      spring.x += spring.vx * deltaTime;
+      spring.y += spring.vy * deltaTime;
+
+      // Snap to target if very close and velocity is low (avoid micro-jitter)
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const speed = Math.sqrt(spring.vx * spring.vx + spring.vy * spring.vy);
+      if (distance < 0.5 && speed < 5) {
+        spring.x = target.x;
+        spring.y = target.y;
+        spring.vx = 0;
+        spring.vy = 0;
+      }
+    });
+  }
+
   // Vanilla rendering: manually building/updating DOM elements
   private render() {
     Object.entries(this.others).forEach(([id, target]) => {
-      let current = this.current[id];
-      if (!current) return;
-
-      // LERP: Linear Interpolation for smoothness
-      // Move 15% of the distance each frame
-      const smoothness = 0.15;
-
-      current.x += (target.x - current.x) * smoothness;
-      current.y += (target.y - current.y) * smoothness;
-
-      // Snap if very close to avoid micro-jitter
-      if (Math.abs(target.x - current.x) < 0.1) current.x = target.x;
-      if (Math.abs(target.y - current.y) < 0.1) current.y = target.y;
+      const spring = this.springs[id];
+      if (!spring) return;
 
       let el = this.container.querySelector(
         `[data-cursor-id="${id}"]`,
@@ -118,7 +182,7 @@ export class Cursors extends HTMLElement {
         el = document.createElement("div");
         el.setAttribute("data-cursor-id", id);
         el.className =
-          "absolute top-0 left-0 transition-none will-change-transform"; // Removed CSS transition in favor of JS lerp
+          "absolute top-0 left-0 transition-none will-change-transform";
 
         // Inner SVG
         el.innerHTML = `
@@ -146,9 +210,9 @@ export class Cursors extends HTMLElement {
         this.container.appendChild(el);
       }
 
-      // Efficiently update transform using the INTERPOLATED (current) position
+      // Efficiently update transform using spring physics position
       // Using translate3d for hardware acceleration
-      el.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
+      el.style.transform = `translate3d(${spring.x}px, ${spring.y}px, 0)`;
     });
   }
 }
