@@ -24,7 +24,8 @@ class CursorsOverlay extends HTMLElement {
 
   // Throttling state
   private pendingUpdate: { x: number; y: number } | null = null;
-  private updateTimeout: number | null = null;
+  private sendRafId: number | null = null;
+  private lastSendTs = 0;
 
   private onPointerMove = (event: PointerEvent) => {
     const x = event.clientX;
@@ -39,15 +40,7 @@ class CursorsOverlay extends HTMLElement {
     const normX = Math.min(Math.max(x / width, 0), 1);
     const normY = Math.min(Math.max(y / height, 0), 1);
     this.pendingUpdate = { x: normX, y: normY };
-
-    if (!this.updateTimeout) {
-      this.updateTimeout = window.setTimeout(() => {
-        if (this.pendingUpdate) {
-          collaborative.sendCursor(this.pendingUpdate.x, this.pendingUpdate.y);
-        }
-        this.updateTimeout = null;
-      }, 50); // Limit to ~20fps to reduce network jitter and allow PerfectCursor to interpolate smoothly
-    }
+    this.scheduleSend();
   };
 
   private onPointerLeave = () => {
@@ -84,6 +77,12 @@ class CursorsOverlay extends HTMLElement {
       const px = entry.lastNorm.x * width;
       const py = entry.lastNorm.y * height;
       entry.element.style.transform = `translate3d(${px - CursorsOverlay.OFFSET_X}px, ${py - CursorsOverlay.OFFSET_Y}px, 0)`;
+      // Re-seed interpolator to avoid jumps after resize
+      entry.perfect.dispose();
+      entry.perfect = new PerfectCursor((point) => {
+        entry.element.style.transform = `translate3d(${point[0] - CursorsOverlay.OFFSET_X}px, ${point[1] - CursorsOverlay.OFFSET_Y}px, 0)`;
+      });
+      entry.perfect.addPoint([px, py]);
     });
   };
 
@@ -102,8 +101,18 @@ class CursorsOverlay extends HTMLElement {
     // Hide native cursor
     this.originalCursorStyle = document.body.style.cursor || null;
     document.body.style.cursor = "none";
-    window.addEventListener("pointerleave", this.onPointerLeave, true);
-    window.addEventListener("pointerenter", this.onPointerEnter, true);
+    window.addEventListener("pointerleave", this.onPointerLeave, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("pointerenter", this.onPointerEnter, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("visibilitychange", this.onVisibilityChange, {
+      passive: true,
+    });
+    window.addEventListener("blur", this.onWindowBlur, { passive: true });
     window.addEventListener("resize", this.onResize);
 
     // Create local cursor if userInfo already available, otherwise wait for init
@@ -139,7 +148,9 @@ class CursorsOverlay extends HTMLElement {
     });
 
     // Send our cursor position to the room
-    window.addEventListener("pointermove", this.onPointerMove);
+    window.addEventListener("pointermove", this.onPointerMove, {
+      passive: true,
+    });
   }
 
   disconnectedCallback() {
@@ -149,6 +160,8 @@ class CursorsOverlay extends HTMLElement {
     window.removeEventListener("pointermove", this.onPointerMove);
     window.removeEventListener("pointerleave", this.onPointerLeave, true);
     window.removeEventListener("pointerenter", this.onPointerEnter, true);
+    window.removeEventListener("visibilitychange", this.onVisibilityChange);
+    window.removeEventListener("blur", this.onWindowBlur);
     window.removeEventListener("resize", this.onResize);
     this.cleanupPresence?.();
     this.cleanupCursor?.();
@@ -158,9 +171,9 @@ class CursorsOverlay extends HTMLElement {
     this.cursors.clear();
     this.localCursor = null;
 
-    if (this.updateTimeout) {
-      window.clearTimeout(this.updateTimeout);
-      this.updateTimeout = null;
+    if (this.sendRafId) {
+      cancelAnimationFrame(this.sendRafId);
+      this.sendRafId = null;
     }
   }
 
@@ -214,7 +227,9 @@ class CursorsOverlay extends HTMLElement {
   }
 
   private syncUsers(users: Presence[]) {
-    const seen = new Set(users.map((u) => u.id));
+    const currentRoute = window.location.pathname;
+    const sameRouteUsers = users.filter((u) => u.route === currentRoute);
+    const seen = new Set(sameRouteUsers.map((u) => u.id));
 
     // Remove cursors for users that left
     for (const [id, entry] of this.cursors.entries()) {
@@ -226,7 +241,7 @@ class CursorsOverlay extends HTMLElement {
     }
 
     // Add/update cursors for active users
-    users.forEach((user) => {
+    sameRouteUsers.forEach((user) => {
       const existing = this.cursors.get(user.id);
 
       if (existing) {
@@ -319,6 +334,36 @@ class CursorsOverlay extends HTMLElement {
       </div>
     `;
   }
+
+  private scheduleSend() {
+    if (this.sendRafId != null) return;
+    this.sendRafId = requestAnimationFrame(this.flushSend);
+  }
+
+  private flushSend = (timestamp: number) => {
+    this.sendRafId = null;
+    if (!this.pendingUpdate) return;
+
+    if (timestamp - this.lastSendTs >= 50) {
+      collaborative.sendCursor(this.pendingUpdate.x, this.pendingUpdate.y);
+      this.lastSendTs = timestamp;
+      this.pendingUpdate = null;
+    }
+
+    if (this.pendingUpdate) {
+      this.sendRafId = requestAnimationFrame(this.flushSend);
+    }
+  };
+
+  private onVisibilityChange = () => {
+    if (document.hidden) {
+      this.onPointerLeave();
+    }
+  };
+
+  private onWindowBlur = () => {
+    this.onPointerLeave();
+  };
 }
 
 customElements.define("cursors-overlay", CursorsOverlay);
