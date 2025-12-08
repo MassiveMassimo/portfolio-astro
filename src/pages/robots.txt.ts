@@ -27,4 +27,3 @@ export const GET: APIRoute = ({ site }) => {
     },
   });
 };
-

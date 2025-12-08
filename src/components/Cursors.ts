@@ -148,7 +148,7 @@ class CursorsOverlay extends HTMLElement {
             </filter>
           </defs>
         </svg>
-        <div class="absolute left-6 top-1 text-xs font-medium text-white drop-shadow-md select-none whitespace-nowrap">
+        <div class="absolute left-6 top-1 text-xs font-medium text-foreground drop-shadow-md select-none whitespace-nowrap">
           ${label}
         </div>
       </div>

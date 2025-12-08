@@ -12,8 +12,10 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
     "@fontsource-variable/fraunces": "^5.2.9",
+    "@tailwindcss/vite": "^4.1.17",
     "astro": "^5.16.4",
-    "perfect-cursors": "^1.0.5"
+    "perfect-cursors": "^1.0.5",
+    "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
     "@astrojs/sitemap": "^3.6.0",
@@ -22,7 +24,6 @@
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "unocss": "^66.5.10",
     "wrangler": "^4.53.0"
   }
 }
