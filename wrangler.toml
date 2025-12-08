@@ -7,6 +7,11 @@ compatibility_flags = ["nodejs_compat"]
 # Specify the main entry point to the worker script
 main = "dist/_worker.js/index.js"
 
+# Also include the static assets from the build
+[assets]
+directory = "dist"
+binding = "ASSETS"
+
 # Define the Durable Object namespace
 [[durable_objects.bindings]]
 name = "CURSOR_ROOM"
