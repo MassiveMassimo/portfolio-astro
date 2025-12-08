@@ -15,14 +15,19 @@ export type Presence = {
 
 type CollabEventMap = {
   "presence-update": Presence[]; // List of all online users
-  "cursor-update": { id: string; x: number; y: number }; // Single cursor update
+  "cursor-update": { id: string; x: number | null; y: number | null }; // Single cursor update (normalized, nullable)
+  init: UserInfo; // Fired when collaborative.init() is called
 };
 
 class CollaborativeStore extends EventTarget {
   private ws: WebSocket | null = null;
   private roomId = "global-room";
-  private userInfo: UserInfo | null = null;
+  private _userInfo: UserInfo | null = null;
   private currentRoute = "/";
+
+  get userInfo(): UserInfo | null {
+    return this._userInfo;
+  }
 
   // Local state cache
   private presence: Map<string, Presence> = new Map();
@@ -40,7 +45,8 @@ class CollaborativeStore extends EventTarget {
 
   init(roomId: string, userInfo: UserInfo) {
     this.roomId = roomId;
-    this.userInfo = userInfo;
+    this._userInfo = userInfo;
+    this.dispatch("init", userInfo);
     this.connect();
   }
 
@@ -56,7 +62,7 @@ class CollaborativeStore extends EventTarget {
       // Send initial presence
       this.send({
         type: "join",
-        info: this.userInfo,
+        info: this._userInfo,
         route: this.currentRoute,
       });
     };
@@ -107,7 +113,7 @@ class CollaborativeStore extends EventTarget {
     this.send({ type: "route-change", route });
   }
 
-  sendCursor(x: number, y: number) {
+  sendCursor(x: number | null, y: number | null) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.send({ type: "cursor", x, y });
     }
